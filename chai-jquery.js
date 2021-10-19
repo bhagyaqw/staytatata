@@ -1,7 +1,7 @@
 (function (chaiJquery) {
   // Module systems magic dance.
   if (typeof require === "function" && typeof exports === "object" && typeof module === "object") {
-    // NodeJS
+    
     module.exports = chaiJquery;
   } else if (typeof define === "function" && define.amd) {
     // AMD
@@ -9,7 +9,6 @@
       return function (chai, utils) {
         return chaiJquery(chai, utils, $);
       };
-    });
   } else {
     // Other environment (usually <script> tag): plug in to global chai instance directly.
     chai.use(function (chai, utils) {
@@ -25,17 +24,35 @@
     function (object, prototype) {
       object.__proto__ = prototype;
     } :
-    function (object, prototype) {
-      var excludeNames = /^(?:length|name|arguments|caller)$/;
-
       function copyProperties(dst, src) {
         Object.getOwnPropertyNames(src).forEach(function (name) {
-          if (!excludeNames.test(name)) {
+
             Object.defineProperty(dst, name,
               Object.getOwnPropertyDescriptor(src, name));
           }
         });
-      }
+      }fine(['jquery'], function ($) {
+      return function (chai, utils) {flag = utils.flag;
+  $ = $ || jQuery;
+
+  var setPrototypeOf = '__proto__' in Object ?
+    function (object, prototype) {
+      object.__proto__ = prototype;
+    } :
+        return chaiJquery(chai, utils, $);
+      };
+    });
+  } else {
+    // Other environment (usually <script> tag): plug in to global chai instance directly.
+    chai.use(function (chai, utils) {
+      return chaiJquery(chai, utils, jQuery);
+    });
+  }
+}(function (chai, utils, $) {
+  var inspect = utils.inspect,
+    flag = utils.flag;
+  $ = $ || jQuery;
+
 
       copyProperties(object, prototype);
       copyProperties(object, Object.getPrototypeOf(prototype));
