@@ -1,23 +1,9 @@
 /**
  * @license r.js 2.1.8+ Fri, 20 Sep 2013 19:17:59 GMT Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/jrburke/requirejs for details
- */
-
-/*
- * This is a bootstrap script to allow running RequireJS in the command line
+ This is a bootstrap script to allow running RequireJS in the command line
  * in either a Java/Rhino or Node environment. It is modified by the top-level
  * dist.js file to inject other files to completely enable this file. It is
- * the shell of the r.js file.
- */
-
-/*jslint evil: true, nomen: true, sloppy: true */
-/*global readFile: true, process: false, Packages: false, print: false,
- console: false, java: false, module: false, requirejsVars, navigator,
- document, importScripts, self, location, Components, FileUtils */
-
-var requirejs, require, define, xpcUtil;
-(function (console, args, readFileFunc) {
+ * the shell of the r.js
   var fileName, env, fs, vm, path, exec, rhinoContext, dir, nodeRequire,
     nodeDefine, exists, reqMain, loadedOptimizedLib, existsForNode, Cc, Ci,
     version = '2.1.8+ Fri, 20 Sep 2013 19:17:59 GMT',
@@ -31,8 +17,7 @@ var requirejs, require, define, xpcUtil;
     readFile = typeof readFileFunc !== 'undefined' ? readFileFunc : null;
 
   function showHelp() {
-    console.log('See https://github.com/jrburke/r.js for usage.');
-  }
+    c
 
   if ((typeof navigator !== 'undefined' && typeof document !== 'undefined') ||
     (typeof importScripts !== 'undefined' && typeof self !== 'undefined')) {
@@ -146,6 +131,57 @@ var requirejs, require, define, xpcUtil;
         //There has to be an easier way to do this.
         var i, part, ary,
           firstChar = path.charAt(0);
+
+    fileName = args[0];
+
+    if (fileName && fileName.indexOf('-') === 0) {
+      commandOption = fileName.substring(1);
+      fileName = args[1];
+    }
+
+    //Set up execution context.
+    rhinoContext = Packages.org.mozilla.javascript.ContextFactory.getGlobal().enterContext();
+
+    exec = function (string, name) {
+      return rhinoContext.evaluateString(this, string, name, 0, null);
+    };
+
+    exists = function (fileName) {
+      return (new java.io.File(fileName)).exists();
+    };
+
+    //Define a console.log for easier logging. Don't
+    //get fancy though.
+    if (typeof console === 'undefined') {
+      console = {
+        log: function () {
+          print.apply(undefined, arguments);
+        }
+      };
+    }
+  } else if (typeof process !== 'undefined' && process.versions && !!process.versions.node) {
+    env = 'node';
+
+    //Get the fs module via Node's require before it
+    //gets replaced. Used in require/node.js
+    fs = require('fs');
+    vm = require('vm');
+    path = require('path');
+    //In Node 0.7+ existsSync is on fs.
+    existsForNode = fs.existsSync || path.existsSync;
+
+    nodeRequire = require;
+    nodeDefine = define;
+    reqMain = require.main;
+
+    //Temporarily hide require and define to allow require.js to define
+    //them.
+    require = undefined;
+    define = undefined;
+
+    readFile = function (path) {
+      return fs.readFileSync(path, 'utf8');
+    };
 
         if (firstChar !== '/' &&
           firstChar !== '\\' &&
