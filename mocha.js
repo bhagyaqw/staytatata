@@ -3,30 +3,7 @@
 // CommonJS require()
 
 function require(p){
-    var path = require.resolve(p)
-      , mod = require.modules[path];
-    if (!mod) throw new Error('failed to require "' + p + '"');
-    if (!mod.exports) {
-      mod.exports = {};
-      mod.call(mod.exports, mod, mod.exports, require.relative(path));
-    }
-    return mod.exports;
-  }
-
-require.modules = {};
-
-require.resolve = function (path){
-    var orig = path
-      , reg = path + '.js'
-      , index = path + '/index.js';
-    return require.modules[reg] && reg
-      || require.modules[index] && index
-      || orig;
-  };
-
-require.register = function (path, fn){
-    require.modules[path] = fn;
-  };
+    var path = r
 
 require.relative = function (parent) {
     return function(p){
